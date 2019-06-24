@@ -1,18 +1,23 @@
-FROM servergurus/ubuntu-jdk8
-MAINTAINER Prasanjit Singh <nixgurus@gmail.com>
+FROM ubuntu:18.04
 
-# setup WildFly 
-COPY wildfly-8.2.0.Final /opt/wildfly
+MAINTAINER damaris <damarisnamukhosi@gmail.com>
 
-# install example app on wildfy
-COPY wildfly-spring-boot-sample-1.0.0.war /opt/wildfly/standalone/deployments/
+RUN apt-get update && apt-get install -y apache2 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN java -version
+ENV APACHE_RUN_USER  www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR   /var/log/apache2
+ENV APACHE_PID_FILE  /var/run/apache2/apache2.pid
+ENV APACHE_RUN_DIR   /var/run/apache2
+ENV APACHE_LOCK_DIR  /var/lock/apache2
+ENV APACHE_LOG_DIR   /var/log/apache2
 
+RUN mkdir -p $APACHE_RUN_DIR
+RUN mkdir -p $APACHE_LOCK_DIR
+RUN mkdir -p $APACHE_LOG_DIR
 
-# Expose the ports we're interested in
-EXPOSE 8080 9990 9090
+COPY index.html /var/www/html
 
-# Set the default command to run on boot
-# This will boot WildFly in the standalone mode and bind to all interface
-CMD ["/opt/wildfly/bin/standalone.sh", "-c", "standalone-full.xml", "-b", "0.0.0.0"]
+EXPOSE 80
+
+CMD ["/usr/sbin/apache2", "-D", "FOREGROUND"]
